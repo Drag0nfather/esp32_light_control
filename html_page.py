@@ -50,4 +50,20 @@ home_page = """\
   </div>
 </section>
 
-</body></html>"""
+</body></html>
+"""
+
+
+success_setting_time = """\
+<!DOCTYPE html>
+<html style="font-size: 16px;" lang="ru"><head>
+<meta charset="utf-8">
+<title>Время установлено</title>
+</head>
+  <div class="u-clearfix u-sheet u-sheet-1" style="margin-right: 50px">
+	<div class="u-form u-form-1" style="text-align: center">
+		<h2>Время работы ламп с %s по %s</h2>
+	</div>
+  </div>
+</html>
+"""

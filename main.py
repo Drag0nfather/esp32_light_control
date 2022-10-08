@@ -2,7 +2,7 @@ import time
 import machine
 import network
 import ds1302
-from html_page import home_page
+from html_page import home_page, success_setting_time
 from MicroWebSrv import MicroWebSrv
 import _thread
 
@@ -80,7 +80,7 @@ def main_post_handler(httpClient, httpResponse):
     start_time = form_data["input5"]
     end_time = form_data["input6"]
 
-    content = home_page
+    content = success_setting_time % (start_time, end_time)
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
 
