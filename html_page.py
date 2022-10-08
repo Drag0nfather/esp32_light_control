@@ -21,18 +21,6 @@ home_page = """\
 		  <label class="u-label">1</label>
 		  <input type="range" name="input1" min="0" max="1023" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
 		</div>
-		<div class="u-form-date u-form-group u-form-group-2">
-			<label class="u-label">2</label>
-			<input type="range" name="input2"  min="0" max="1023" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
-		</div>
-		<div class="u-form-date u-form-group u-form-group-3">
-			<label class="u-label">3</label>
-			<input type="range" name="input3" min="0" max="1023" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
-		</div>
-		<div class="u-form-date u-form-group u-form-group-4">
-			<label class="u-label">4</label>
-			<input type="range" name="input4"  min="0" max="1023" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
-		</div>
 		<div class="u-form-date u-form-group u-form-partition-factor-2 u-form-group-5" style="float: left; width: 45%; height: 100px;">
 		  <label for="date-fcba" class="u-label u-label-5">Время с</label>
 		  <input type="time" id="date-fcba" name="input5" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
