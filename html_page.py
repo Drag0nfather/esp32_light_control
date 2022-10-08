@@ -14,7 +14,7 @@ home_page = """\
 </head>
 <body data-home-page="Главная.html" data-home-page-title="Главная" class="u-body u-xl-mode" data-lang="ru"><header class="u-clearfix u-header u-header" id="sec-b358"><div class="u-clearfix u-sheet u-sheet-1"></div></header>
 <section class="u-clearfix u-section-1" id="sec-93b1">
-  <div class="u-clearfix u-sheet u-sheet-1">
+  <div class="u-clearfix u-sheet u-sheet-1" style="margin-right: 50px">
 	<div class="u-form u-form-1">
 	  <form action="/test2" method="post" accept-charset="ISO-8859-1" class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" name="form" style="padding: 10px;">
 		<div class="u-form-date u-form-group u-form-group-1">
