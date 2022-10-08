@@ -10,6 +10,7 @@ import _thread
 first_pwm = ''
 second_pwm = ''
 third_pwm = ''
+fourth_pwm = ''
 
 start_time = ''
 end_time = ''
@@ -69,12 +70,13 @@ def main_get_handler(httpClient, httpResponse):
 
 @MicroWebSrv.route('/test2', 'POST')
 def main_post_handler(httpClient, httpResponse):
-    global first_pwm, second_pwm, third_pwm, start_time, end_time
+    global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time
 
     form_data = httpClient.ReadRequestPostedFormData()
     first_pwm = form_data["input1"]
     second_pwm = form_data["input2"]
     third_pwm = form_data["input3"]
+    fourth_pwm = form_data["input4"]
     start_time = form_data["input5"]
     end_time = form_data["input6"]
 
@@ -84,7 +86,7 @@ def main_post_handler(httpClient, httpResponse):
 
 def loop():
     while True:
-        global first_pwm, second_pwm, third_pwm, start_time, end_time, light_on, light_off, wi_fi
+        global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, light_on, light_off, wi_fi
         time.sleep(5)
         button_state = button.value()
         if button_state == 1 and wi_fi is False:
@@ -101,12 +103,14 @@ def loop():
             start_led(16, 50, int(first_pwm))
             start_led(17, 50, int(second_pwm))
             start_led(18, 50, int(third_pwm))
+            start_led(19, 50, int(fourth_pwm))
             light_on = True
             light_off = False
         if curr_time == end_time and light_on:
             stop_led(16)
             stop_led(17)
             stop_led(18)
+            stop_led(19)
             light_on = False
             light_off = True
 
