@@ -2,7 +2,7 @@ import time
 import machine
 import network
 import ds1302
-from html_page import home_page
+from html_page import home_page, success_setting_schedule, set_time_page, success_set_time
 from MicroWebSrv import MicroWebSrv
 import _thread
 
@@ -61,7 +61,7 @@ def start_server(threaded):
 
 @MicroWebSrv.route("/test2")
 def main_get_handler(httpClient, httpResponse):
-    content = home_page
+    content = home_page % ds.date_time()
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
 
@@ -74,7 +74,22 @@ def main_post_handler(httpClient, httpResponse):
     start_time = form_data["input5"]
     end_time = form_data["input6"]
 
-    content = home_page
+    content = success_setting_schedule % (start_time, end_time)
+    httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
+
+
+@MicroWebSrv.route("/set-time")
+def main_get_handler(httpClient, httpResponse):
+    content = set_time_page
+    httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
+
+@MicroWebSrv.route("/set-time", 'POST')
+def main_get_handler(httpClient, httpResponse):
+    form_data = httpClient.ReadRequestPostedFormData()
+    hour, minute = form_data.split(':')
+    ds.hour(hour)
+    ds.minute(minute)
+    content = success_set_time
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
 
