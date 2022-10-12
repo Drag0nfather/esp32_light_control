@@ -92,7 +92,7 @@ def main_get_handler(httpClient, httpResponse):
 @MicroWebSrv.route("/set-time", 'POST')
 def main_get_handler(httpClient, httpResponse):
     form_data = httpClient.ReadRequestPostedFormData()
-    hour, minute = form_data.split(':')
+    hour, minute = form_data['input6'].split(':')
     ds.hour(hour)
     ds.minute(minute)
     content = success_set_time
