@@ -1,4 +1,5 @@
 import time
+from datetime import time as tm
 import machine
 import network
 import ds1302
@@ -62,6 +63,19 @@ def start_server(threaded):
         pass
 
 
+def light_control_by_time(curr_time, start_time, end_time):
+    curr_hour, curr_minute = curr_time.split(':')
+    start_hour, start_minute = start_time.split(':')
+    end_hour, end_minute = end_time.split(':')
+    curr_time = tm(curr_hour, curr_minute)
+    start_time = tm(start_hour, end_minute)
+    end_time = tm(end_hour, end_minute)
+    if start_time <= curr_time <= end_time:
+        return True
+    else:
+        return False
+
+
 @MicroWebSrv.route("/test2")
 def main_get_handler(httpClient, httpResponse):
     content = home_page % ds.date_time()
@@ -112,16 +126,15 @@ def loop():
             wi_fi = False
         current_datetime_from_ds1302 = ds.date_time()
         curr_time = f'{current_datetime_from_ds1302[4]}:{current_datetime_from_ds1302[5]}'
-        if len(curr_time) == 4:
-            curr_time = '0' + curr_time
-        if curr_time == start_time and light_off:
+        status = light_control_by_time(curr_time, start_time, end_time)
+        if status and light_off:
             start_led(16, 50, int(first_pwm))
             start_led(17, 50, int(second_pwm))
             start_led(18, 50, int(third_pwm))
             start_led(19, 50, int(fourth_pwm))
             light_on = True
             light_off = False
-        if curr_time == end_time and light_on:
+        if not status and light_on:
             stop_led(16)
             stop_led(17)
             stop_led(18)
