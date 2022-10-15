@@ -1,5 +1,5 @@
 import time
-from datetime import time as tm
+import utime
 import machine
 import network
 import ds1302
@@ -15,6 +15,8 @@ fourth_pwm = ''
 
 start_time = ''
 end_time = ''
+old_start_time = ''
+old_end_time = ''
 
 light_on = False
 light_off = True
@@ -29,23 +31,23 @@ ds = ds1302.DS1302(machine.Pin(25), machine.Pin(26), machine.Pin(27))
 button = machine.Pin(13, machine.Pin.IN)
 
 
-def start_led(pin_num, freq_num, duty_num):
+def start_led(pin_num, duty_num):
     pin = machine.Pin(pin_num)
     pwm = machine.PWM(pin)
-    pwm.freq(freq_num)
+    pwm.freq(200)
     pwm.duty(duty_num)
 
 
 def stop_led(pin_num):
     pin = machine.Pin(pin_num)
     pwm = machine.PWM(pin)
-    pwm.deinit()
+    pwm.duty(1000)
 
 
 def activate_wi_fi():
     ap = network.WLAN(network.AP_IF)
-    ap.active(True)
     ap.config(essid='esp32', password='123123123')
+    ap.active(True)
 
 
 def deactivate_wi_fi():
@@ -67,9 +69,9 @@ def light_control_by_time(curr_time, start_time, end_time):
     curr_hour, curr_minute = curr_time.split(':')
     start_hour, start_minute = start_time.split(':')
     end_hour, end_minute = end_time.split(':')
-    curr_time = tm(curr_hour, curr_minute)
-    start_time = tm(start_hour, end_minute)
-    end_time = tm(end_hour, end_minute)
+    curr_time = utime.mktime([2000, 1, 1, int(curr_hour), int(curr_minute), 0, 1, 1])
+    start_time = utime.mktime([2000, 1, 1, int(start_hour), int(start_minute), 0, 1, 1])
+    end_time = utime.mktime([2000, 1, 1, int(end_hour), int(end_minute), 0, 1, 1])
     if start_time <= curr_time <= end_time:
         return True
     else:
@@ -115,7 +117,7 @@ def main_get_handler(httpClient, httpResponse):
 
 def loop():
     while True:
-        global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, light_on, light_off, wi_fi
+        global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, light_on, light_off, wi_fi, old_start_time, old_end_time
         time.sleep(5)
         button_state = button.value()
         if button_state == 1 and wi_fi is False:
@@ -126,14 +128,31 @@ def loop():
             wi_fi = False
         current_datetime_from_ds1302 = ds.date_time()
         curr_time = f'{current_datetime_from_ds1302[4]}:{current_datetime_from_ds1302[5]}'
-        status = light_control_by_time(curr_time, start_time, end_time)
+        if start_time and end_time:
+            status = light_control_by_time(curr_time, start_time, end_time)
+        else:
+            status = False
         if status and light_off:
-            start_led(16, 50, int(first_pwm))
-            start_led(17, 50, int(second_pwm))
-            start_led(18, 50, int(third_pwm))
-            start_led(19, 50, int(fourth_pwm))
+            start_led(16, abs(int(first_pwm)))
+            start_led(17, abs(int(second_pwm)))
+            start_led(18, abs(int(third_pwm)))
+            start_led(19, abs(int(fourth_pwm)))
             light_on = True
             light_off = False
+            old_start_time = start_time
+            old_end_time = end_time
+        if status and start_time != old_start_time or end_time != old_end_time:
+            stop_led(16)
+            stop_led(17)
+            stop_led(18)
+            stop_led(19)
+            time.sleep(2)
+            start_led(16, abs(int(first_pwm)))
+            start_led(17, abs(int(second_pwm)))
+            start_led(18, abs(int(third_pwm)))
+            start_led(19, abs(int(fourth_pwm)))
+            old_start_time = start_time
+            old_end_time = end_time
         if not status and light_on:
             stop_led(16)
             stop_led(17)

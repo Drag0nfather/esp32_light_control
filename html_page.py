@@ -20,19 +20,19 @@ home_page = """\
 	  <form action="/test2" method="post" accept-charset="ISO-8859-1" class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" name="form" style="padding: 10px;">
 		<div class="u-form-date u-form-group u-form-group-1">
 		  <label class="u-label">1</label>
-		  <input type="range" name="input1" min="0" max="1023" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+		  <input type="range" name="input1" min="-900" max="0" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
 		</div>
 		<div class="u-form-date u-form-group u-form-group-2">
 			<label class="u-label">2</label>
-			<input type="range" name="input2"  min="0" max="1023" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+			<input type="range" name="input2"  min="-900" max="0" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
 		</div>
 		<div class="u-form-date u-form-group u-form-group-3">
 			<label class="u-label">3</label>
-			<input type="range" name="input3" min="0" max="1023" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+			<input type="range" name="input3" min="-900" max="0" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
 		</div>
 		<div class="u-form-date u-form-group u-form-group-4">
 			<label class="u-label">4</label>
-			<input type="range" name="input4"  min="0" max="1023" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+			<input type="range" name="input4"  min="-900" max="0" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
 		</div>
 		<div class="u-form-date u-form-group u-form-partition-factor-2 u-form-group-5" style="float: left; width: 45%%; height: 100px;">
 		  <label for="date-fcba" class="u-label u-label-5">Время с</label>
@@ -63,7 +63,7 @@ success_setting_schedule = """\
 </head>
   <div class="u-clearfix u-sheet u-sheet-1" style="margin-right: 50px">
 	<div class="u-form u-form-1" style="text-align: center">
-		<h2>Время работы ламп с %s по %s</h2>
+		<h2>Время работы с %s по %s</h2>
 	</div>
   </div>
 </html>
