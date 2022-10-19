@@ -69,13 +69,31 @@ def light_control_by_time(curr_time, start_time, end_time):
     curr_hour, curr_minute = curr_time.split(':')
     start_hour, start_minute = start_time.split(':')
     end_hour, end_minute = end_time.split(':')
-    curr_time = utime.mktime([2000, 1, 1, int(curr_hour), int(curr_minute), 0, 1, 1])
-    start_time = utime.mktime([2000, 1, 1, int(start_hour), int(start_minute), 0, 1, 1])
-    end_time = utime.mktime([2000, 1, 1, int(end_hour), int(end_minute), 0, 1, 1])
-    if start_time <= curr_time <= end_time:
-        return True
-    else:
-        return False
+    curr_time_utime = utime.mktime([2000, 1, 2, int(curr_hour), int(curr_minute), 0, 1, 1])
+    start_time_utime = utime.mktime([2000, 1, 2, int(start_hour), int(start_minute), 0, 1, 1])
+    end_time_utime = utime.mktime([2000, 1, 2, int(end_hour), int(end_minute), 0, 1, 1])
+    if start_time_utime < end_time_utime:
+        if start_time_utime <= curr_time_utime <= end_time_utime:
+            return True
+        else:
+            return False
+    elif start_time_utime > end_time_utime:
+        start_time_utime = utime.mktime([2000, 1, 2, int(start_hour), int(start_minute), 0, 1, 1])
+        end_time_utime = utime.mktime([2000, 1, 3, int(end_hour), int(end_minute), 0, 1, 1])
+        if curr_hour >= start_hour:
+            # after midnight
+            curr_time_utime = utime.mktime([2000, 1, 2, int(curr_hour), int(curr_minute), 0, 1, 1])
+            if start_time_utime <= curr_time_utime <= end_time_utime:
+                return True
+            else:
+                return False
+        elif curr_hour < start_hour:
+            # before midnight
+            curr_time_utime = utime.mktime([2000, 1, 3, int(curr_hour), int(curr_minute), 0, 1, 1])
+            if start_time_utime <= curr_time_utime <= end_time_utime:
+                return True
+            else:
+                return False
 
 
 @MicroWebSrv.route("/test2")
