@@ -18,6 +18,8 @@ end_time = ''
 old_start_time = ''
 old_end_time = ''
 
+is_sunrise = ''
+
 light_on = False
 light_off = True
 
@@ -96,6 +98,40 @@ def light_control_by_time(curr_time, start_time, end_time):
                 return False
 
 
+def check_time_to_sunrise(curr_time, start_time, end_time):
+    curr_hour, curr_minute = curr_time.split(':')
+    start_hour, start_minute = start_time.split(':')
+    end_hour, end_minute = end_time.split(':')
+    curr_time_utime = utime.mktime([2000, 1, 2, int(curr_hour), int(curr_minute), 0, 1, 1])
+    start_time_utime = utime.mktime([2000, 1, 2, int(start_hour), int(start_minute), 0, 1, 1])
+    end_time_utime = utime.mktime([2000, 1, 2, int(end_hour), int(end_minute), 0, 1, 1])
+    if start_time_utime < end_time_utime:
+        if curr_time_utime < start_time_utime:
+            return start_time_utime-curr_time_utime
+        elif curr_time_utime > end_time_utime:
+            return curr_time_utime-end_time_utime
+        else:
+            return 0
+    elif start_time_utime > end_time_utime:
+        start_time_utime = utime.mktime([2000, 1, 2, int(start_hour), int(start_minute), 0, 1, 1])
+        end_time_utime = utime.mktime([2000, 1, 3, int(end_hour), int(end_minute), 0, 1, 1])
+        if curr_hour <= start_hour:
+            curr_time_utime = utime.mktime([2000, 1, 3, int(curr_hour), int(curr_minute), 0, 1, 1])
+            if curr_time_utime < start_time_utime:
+                return start_time_utime - curr_time_utime
+            elif curr_time_utime > end_time_utime:
+                return curr_time_utime - end_time_utime
+            else:
+                return 0
+        elif curr_hour >= start_hour:
+            curr_time_utime = utime.mktime([2000, 1, 2, int(curr_hour), int(curr_minute), 0, 1, 1])
+            if curr_time_utime < start_time_utime:
+                return start_time_utime - curr_time_utime
+            elif curr_time_utime > end_time_utime:
+                return curr_time_utime - end_time_utime
+            else:
+                return 0
+
 @MicroWebSrv.route("/test2")
 def main_get_handler(httpClient, httpResponse):
     content = home_page % ds.date_time()
@@ -104,7 +140,7 @@ def main_get_handler(httpClient, httpResponse):
 
 @MicroWebSrv.route('/test2', 'POST')
 def main_post_handler(httpClient, httpResponse):
-    global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time
+    global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, is_sunrise
 
     form_data = httpClient.ReadRequestPostedFormData()
     first_pwm = form_data["input1"]
@@ -113,6 +149,7 @@ def main_post_handler(httpClient, httpResponse):
     fourth_pwm = form_data["input4"]
     start_time = form_data["input5"]
     end_time = form_data["input6"]
+    is_sunrise = form_data['input7']
 
     content = success_setting_schedule % (start_time, end_time)
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
@@ -135,7 +172,7 @@ def main_get_handler(httpClient, httpResponse):
 
 def loop():
     while True:
-        global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, light_on, light_off, wi_fi, old_start_time, old_end_time
+        global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, light_on, light_off, wi_fi, old_start_time, old_end_time, is_sunrise
         time.sleep(5)
         button_state = button.value()
         if button_state == 1 and wi_fi is False:
@@ -150,35 +187,40 @@ def loop():
             status = light_control_by_time(curr_time, start_time, end_time)
         else:
             status = False
-        if status and light_off:
-            start_led(16, abs(int(first_pwm)))
-            start_led(17, abs(int(second_pwm)))
-            start_led(18, abs(int(third_pwm)))
-            start_led(19, abs(int(fourth_pwm)))
-            light_on = True
-            light_off = False
-            old_start_time = start_time
-            old_end_time = end_time
-        if status and start_time != old_start_time or end_time != old_end_time:
-            stop_led(16)
-            stop_led(17)
-            stop_led(18)
-            stop_led(19)
-            time.sleep(2)
-            start_led(16, abs(int(first_pwm)))
-            start_led(17, abs(int(second_pwm)))
-            start_led(18, abs(int(third_pwm)))
-            start_led(19, abs(int(fourth_pwm)))
-            old_start_time = start_time
-            old_end_time = end_time
-        if not status and light_on:
-            stop_led(16)
-            stop_led(17)
-            stop_led(18)
-            stop_led(19)
-            light_on = False
-            light_off = True
+        if is_sunrise == 'off':
+            if status and light_off:
+                start_led(16, abs(int(first_pwm)))
+                start_led(17, abs(int(second_pwm)))
+                start_led(18, abs(int(third_pwm)))
+                start_led(19, abs(int(fourth_pwm)))
+                light_on = True
+                light_off = False
+                old_start_time = start_time
+                old_end_time = end_time
+            if status and start_time != old_start_time or end_time != old_end_time:
+                stop_led(16)
+                stop_led(17)
+                stop_led(18)
+                stop_led(19)
+                time.sleep(2)
+                start_led(16, abs(int(first_pwm)))
+                start_led(17, abs(int(second_pwm)))
+                start_led(18, abs(int(third_pwm)))
+                start_led(19, abs(int(fourth_pwm)))
+                old_start_time = start_time
+                old_end_time = end_time
+            if not status and light_on:
+                stop_led(16)
+                stop_led(17)
+                stop_led(18)
+                stop_led(19)
+                light_on = False
+                light_off = True
+        elif is_sunrise == 'on':
+            print(check_time_to_sunrise(curr_time, start_time, end_time))
 
 
 _thread.start_new_thread(start_server, (False,))
 _thread.start_new_thread(loop, ())
+
+ds.date_time([2022, 10, 26, 3, 9, 30, 16])

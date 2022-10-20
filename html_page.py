@@ -12,38 +12,44 @@ home_page = """\
 <style>.u-form-control-hidden {display: none !important;}</style>
 <style>.u-overlap.u-overlap-transparent:not(.u-overlap-contrast) .u-header :not(.u-nav-item) > .u-btn, .u-gradient > .u-container-layout > .u-btn, .u-image:not(.u-shading) > .u-container-layout > .u-btn, .u-btn {background-color: #478ac9;color: #ffffff;}</style>
 </head>
-<body data-home-page="Главная.html" data-home-page-title="Главная" class="u-body u-xl-mode" data-lang="ru"><header class="u-clearfix u-header u-header" id="sec-b358"><div class="u-clearfix u-sheet u-sheet-1"></div></header>
-<section class="u-clearfix u-section-1" id="sec-93b1">
-  <div class="u-clearfix u-sheet u-sheet-1" style="margin-right: 50px">
-  <div style="text-align: right">Текущее время - %s</div>
-	<div class="u-form u-form-1">
-	  <form action="/test2" method="post" accept-charset="ISO-8859-1" class="u-clearfix u-form-spacing-10 u-form-vertical u-inner-form" name="form" style="padding: 10px;">
-		<div class="u-form-date u-form-group u-form-group-1">
-		  <label class="u-label">1</label>
-		  <input type="range" name="input1" min="-900" max="0" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+<body data-home-page="Главная.html" data-home-page-title="Главная">
+<section>
+  <div style="margin-right: 50px">
+	  <div style="text-align: right; margin-bottom: -3%%"><h4>Текущее время - %s</h4></div>
+	<div>
+	  <form action="/test2" method="post" accept-charset="ISO-8859-1" style="padding: 10px;">
+		<div>
+		  <label>1</label>
+		  <input type="range" name="input1" min="-900" max="0" step="1" class="u-input" required="">
 		</div>
-		<div class="u-form-date u-form-group u-form-group-2">
-			<label class="u-label">2</label>
-			<input type="range" name="input2"  min="-900" max="0" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+		<div>
+			<label>2</label>
+			<input type="range" name="input2"  min="-900" max="0" step="1" class="u-input" required="">
 		</div>
-		<div class="u-form-date u-form-group u-form-group-3">
-			<label class="u-label">3</label>
-			<input type="range" name="input3" min="-900" max="0" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+		<div>
+			<label>3</label>
+			<input type="range" name="input3" min="-900" max="0" step="1" class="u-input" required="">
 		</div>
-		<div class="u-form-date u-form-group u-form-group-4">
-			<label class="u-label">4</label>
-			<input type="range" name="input4"  min="-900" max="0" step="1" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+		<div>
+			<label>4</label>
+			<input type="range" name="input4"  min="-900" max="0" step="1" class="u-input" required="">
 		</div>
-		<div class="u-form-date u-form-group u-form-partition-factor-2 u-form-group-5" style="float: left; width: 45%%; height: 100px;">
-		  <label for="date-fcba" class="u-label u-label-5">Время с</label>
-		  <input type="time" id="date-fcba" name="input5" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+		<div style="float: left; width: 45%%; height: 100px; margin-top: 1%%">
+		  <label>Время с</label>
+		  <input type="time" name="input5" class="u-input" required="">
 		</div>
-		<div class="u-form-date u-form-group u-form-partition-factor-2 u-form-group-6" style="float: right; width: 45%%; height: 100px;">
-		  <label for="date-52ee" class="u-label">Время до</label>
-		  <input type="time" id="date-52ee" name="input6" class="u-border-1 u-border-grey-30 u-input u-input-rectangle u-white" required="">
+		<div style="float: right; width: 45%%; height: 100px; margin-top: 1%%">
+		  <label>Время до</label>
+		  <input type="time" name="input6" class="u-input" required="">
+		<div class="u-input" style="text-align: right; margin-top: 2%%">
+			<span title="Опция закат/рассвет добавит пол-часа к началу и концу свечения">Рассвет/закат</span>
+            <br>
+			<input type="radio" name="input7" value="on" required=""> <label for="input7">вкл</label>
+			<input type="radio" name="input7" value="off"> <label for="input7">выкл</label>
 		</div>
-		<div class="u-align-center u-form-group u-form-submit" style="margin-top: 5%%;">
-		  <button class="u-btn u-btn-submit u-button-style" type="submit">Сохранить</button>
+		</div>
+		<div class="u-align-center" style="margin-top: 5%%" >
+		  <button class="u-btn u-btn-submit" type="submit">Сохранить</button>
 		  <input type="submit" value="Сохранить" class="u-form-control-hidden">
 		</div>
 	  </form>
