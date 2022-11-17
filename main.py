@@ -99,7 +99,6 @@ def light_control_by_time(curr_time, start_time, end_time, is_sunrise):
         else:
             return False
     elif is_sunrise == 'on':
-        print(start_time - curr_time, curr_time - end_time)
         if start_time <= curr_time <= end_time:
             return 0
         elif curr_time < start_time and start_time - curr_time <= 1800:
@@ -112,7 +111,6 @@ def light_control_by_time(curr_time, start_time, end_time, is_sunrise):
 
 def light_by_utime_ticks(ticks, power, led_num):
     increase_num = (850 - power) / 10
-    print(increase_num, ticks)
     if ticks == 0:
         start_led(led_num, power)
     elif 1800 >= ticks > 1620:
