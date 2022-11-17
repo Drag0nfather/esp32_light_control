@@ -15,19 +15,17 @@ fourth_pwm = ''
 
 start_time = ''
 end_time = ''
-old_start_time = ''
-old_end_time = ''
+
+start_time_utime = ''
+end_time_utime = ''
+curr_time_utime = ''
 
 is_sunrise = ''
-
-light_on = False
-light_off = True
 
 wi_fi = False
 
 # rtc init
 ds = ds1302.DS1302(machine.Pin(25), machine.Pin(26), machine.Pin(27))
-
 
 # bind button to 13 pin
 button = machine.Pin(13, machine.Pin.IN)
@@ -36,7 +34,7 @@ button = machine.Pin(13, machine.Pin.IN)
 def start_led(pin_num, duty_num):
     pin = machine.Pin(pin_num)
     pwm = machine.PWM(pin)
-    pwm.freq(200)
+    pwm.freq(180)
     pwm.duty(duty_num)
 
 
@@ -67,73 +65,76 @@ def start_server(threaded):
         pass
 
 
-def light_control_by_time(curr_time, start_time, end_time):
-    curr_hour, curr_minute = curr_time.split(':')
-    start_hour, start_minute = start_time.split(':')
-    end_hour, end_minute = end_time.split(':')
-    curr_time_utime = utime.mktime([2000, 1, 2, int(curr_hour), int(curr_minute), 0, 1, 1])
-    start_time_utime = utime.mktime([2000, 1, 2, int(start_hour), int(start_minute), 0, 1, 1])
-    end_time_utime = utime.mktime([2000, 1, 2, int(end_hour), int(end_minute), 0, 1, 1])
-    if start_time_utime < end_time_utime:
-        if start_time_utime <= curr_time_utime <= end_time_utime:
-            return True
+def set_utime_time(start, end):
+    global start_time_utime, end_time_utime, curr_time_utime
+    ds1302_time = ds.date_time()
+    curr_time = f'{ds1302_time[4]}:{ds1302_time[5]}'
+    hour, minute = curr_time.split(':')
+    if len(hour) == 1:
+        hour = '0' + hour
+        curr_time = hour + ':' + minute
+    if len(minute) == 1:
+        curr_time = hour + ':0' + minute
+    if int(start[:2]) < int(end[:2]):
+        start_time_utime = utime.mktime([2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1])
+        end_time_utime = utime.mktime([2000, 1, 2, int(end[:2]), int(end[3:]), 0, 1, 1])
+        curr_time_utime = utime.mktime([2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
+    elif int(start[:2]) >= int(end[:2]):
+        start_time_utime = utime.mktime([2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1])
+        end_time_utime = utime.mktime([2000, 1, 3, int(end[:2]), int(end[3:]), 0, 2, 2])
+        if int(curr_time[:2]) >= int(start[:2]):
+            curr_time_utime = utime.mktime([2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
+        elif int(curr_time[:2]) < int(start[:2]):
+            curr_time_utime = utime.mktime([2000, 1, 3, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
+
+
+def light_control_by_time(curr_time, start_time, end_time, is_sunrise):
+    if is_sunrise == 'off':
+        if start_time <= curr_time <= end_time:
+            return 0
         else:
             return False
-    elif start_time_utime > end_time_utime:
-        start_time_utime = utime.mktime([2000, 1, 2, int(start_hour), int(start_minute), 0, 1, 1])
-        end_time_utime = utime.mktime([2000, 1, 3, int(end_hour), int(end_minute), 0, 1, 1])
-        if curr_hour >= start_hour:
-            # after midnight
-            curr_time_utime = utime.mktime([2000, 1, 2, int(curr_hour), int(curr_minute), 0, 1, 1])
-            if start_time_utime <= curr_time_utime <= end_time_utime:
-                return True
-            else:
-                return False
-        elif curr_hour < start_hour:
-            # before midnight
-            curr_time_utime = utime.mktime([2000, 1, 3, int(curr_hour), int(curr_minute), 0, 1, 1])
-            if start_time_utime <= curr_time_utime <= end_time_utime:
-                return True
-            else:
-                return False
-
-
-def check_time_to_sunrise(curr_time, start_time, end_time):
-    curr_hour, curr_minute = curr_time.split(':')
-    start_hour, start_minute = start_time.split(':')
-    end_hour, end_minute = end_time.split(':')
-    curr_time_utime = utime.mktime([2000, 1, 2, int(curr_hour), int(curr_minute), 0, 1, 1])
-    start_time_utime = utime.mktime([2000, 1, 2, int(start_hour), int(start_minute), 0, 1, 1])
-    end_time_utime = utime.mktime([2000, 1, 2, int(end_hour), int(end_minute), 0, 1, 1])
-    if start_time_utime < end_time_utime:
-        if curr_time_utime < start_time_utime:
-            return start_time_utime-curr_time_utime
-        elif curr_time_utime > end_time_utime:
-            return curr_time_utime-end_time_utime
-        else:
+    elif is_sunrise == 'on':
+        print(start_time - curr_time, curr_time - end_time)
+        if start_time <= curr_time <= end_time:
             return 0
-    elif start_time_utime > end_time_utime:
-        start_time_utime = utime.mktime([2000, 1, 2, int(start_hour), int(start_minute), 0, 1, 1])
-        end_time_utime = utime.mktime([2000, 1, 3, int(end_hour), int(end_minute), 0, 1, 1])
-        if curr_hour <= start_hour:
-            curr_time_utime = utime.mktime([2000, 1, 3, int(curr_hour), int(curr_minute), 0, 1, 1])
-            if curr_time_utime < start_time_utime:
-                return start_time_utime - curr_time_utime
-            elif curr_time_utime > end_time_utime:
-                return curr_time_utime - end_time_utime
-            else:
-                return 0
-        elif curr_hour >= start_hour:
-            curr_time_utime = utime.mktime([2000, 1, 2, int(curr_hour), int(curr_minute), 0, 1, 1])
-            if curr_time_utime < start_time_utime:
-                return start_time_utime - curr_time_utime
-            elif curr_time_utime > end_time_utime:
-                return curr_time_utime - end_time_utime
-            else:
-                return 0
+        elif curr_time < start_time and start_time - curr_time <= 1800:
+            return start_time - curr_time
+        elif curr_time > end_time and curr_time - end_time <= 1800:
+            return curr_time_utime - end_time_utime
+        else:
+            return False
+
+
+def light_by_utime_ticks(ticks, power, led_num):
+    increase_num = (850 - power) / 10
+    print(increase_num, ticks)
+    if ticks == 0:
+        start_led(led_num, power)
+    elif 1800 >= ticks > 1620:
+        start_led(led_num, int(850 - increase_num))
+    elif 1620 >= ticks > 1440:
+        start_led(led_num, int(850 - increase_num * 2))
+    elif 1440 >= ticks > 1260:
+        start_led(led_num, int(850 - increase_num * 3))
+    elif 1260 >= ticks > 1080:
+        start_led(led_num, int(850 - increase_num * 4))
+    elif 1080 >= ticks > 900:
+        start_led(led_num, int(850 - increase_num * 5))
+    elif 900 >= ticks > 720:
+        start_led(led_num, int(850 - increase_num * 6))
+    elif 720 >= ticks > 540:
+        start_led(led_num, int(850 - increase_num * 7))
+    elif 540 >= ticks > 360:
+        start_led(led_num, int(850 - increase_num * 8))
+    elif 360 >= ticks > 1:
+        start_led(led_num, int(850 - increase_num * 9))
+    else:
+        stop_led(led_num)
+
 
 @MicroWebSrv.route("/test2")
-def main_get_handler(httpClient, httpResponse):
+def main_get_handler(httpResponse):
     content = home_page % ds.date_time()
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
@@ -156,9 +157,10 @@ def main_post_handler(httpClient, httpResponse):
 
 
 @MicroWebSrv.route("/set-time")
-def main_get_handler(httpClient, httpResponse):
+def main_get_handler(httpResponse):
     content = set_time_page
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
+
 
 @MicroWebSrv.route("/set-time", 'POST')
 def main_get_handler(httpClient, httpResponse):
@@ -172,7 +174,7 @@ def main_get_handler(httpClient, httpResponse):
 
 def loop():
     while True:
-        global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, light_on, light_off, wi_fi, old_start_time, old_end_time, is_sunrise
+        global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, wi_fi, is_sunrise
         time.sleep(5)
         button_state = button.value()
         if button_state == 1 and wi_fi is False:
@@ -181,46 +183,23 @@ def loop():
         if button_state == 0 and wi_fi is True:
             deactivate_wi_fi()
             wi_fi = False
-        current_datetime_from_ds1302 = ds.date_time()
-        curr_time = f'{current_datetime_from_ds1302[4]}:{current_datetime_from_ds1302[5]}'
         if start_time and end_time:
-            status = light_control_by_time(curr_time, start_time, end_time)
+            set_utime_time(start_time, end_time)
+            global start_time_utime, end_time_utime, curr_time_utime
+            ticks = light_control_by_time(curr_time_utime, start_time_utime, end_time_utime, is_sunrise)
         else:
-            status = False
-        if is_sunrise == 'off':
-            if status and light_off:
-                start_led(16, abs(int(first_pwm)))
-                start_led(17, abs(int(second_pwm)))
-                start_led(18, abs(int(third_pwm)))
-                start_led(19, abs(int(fourth_pwm)))
-                light_on = True
-                light_off = False
-                old_start_time = start_time
-                old_end_time = end_time
-            if status and start_time != old_start_time or end_time != old_end_time:
-                stop_led(16)
-                stop_led(17)
-                stop_led(18)
-                stop_led(19)
-                time.sleep(2)
-                start_led(16, abs(int(first_pwm)))
-                start_led(17, abs(int(second_pwm)))
-                start_led(18, abs(int(third_pwm)))
-                start_led(19, abs(int(fourth_pwm)))
-                old_start_time = start_time
-                old_end_time = end_time
-            if not status and light_on:
-                stop_led(16)
-                stop_led(17)
-                stop_led(18)
-                stop_led(19)
-                light_on = False
-                light_off = True
-        elif is_sunrise == 'on':
-            print(check_time_to_sunrise(curr_time, start_time, end_time))
+            ticks = False
+        if ticks is not False:
+            light_by_utime_ticks(ticks, abs(int(first_pwm)), 16)
+            light_by_utime_ticks(ticks, abs(int(second_pwm)), 17)
+            light_by_utime_ticks(ticks, abs(int(third_pwm)), 18)
+            light_by_utime_ticks(ticks, abs(int(fourth_pwm)), 19)
+        if ticks is False:
+            stop_led(16)
+            stop_led(17)
+            stop_led(18)
+            stop_led(19)
 
 
 _thread.start_new_thread(start_server, (False,))
 _thread.start_new_thread(loop, ())
-
-ds.date_time([2022, 10, 26, 3, 9, 30, 16])
