@@ -75,10 +75,14 @@ def set_utime_time(start, end):
         curr_time = hour + ':' + minute
     if len(minute) == 1:
         curr_time = hour + ':0' + minute
+
     if int(start[:2]) < int(end[:2]):
         start_time_utime = utime.mktime([2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1])
         end_time_utime = utime.mktime([2000, 1, 2, int(end[:2]), int(end[3:]), 0, 1, 1])
-        curr_time_utime = utime.mktime([2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
+        if int(curr_time[:2]) >= int(start[:2]):
+            curr_time_utime = utime.mktime([2000, 1, 1, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
+        elif int(curr_time[:2]) < int(start[:2]):
+            curr_time_utime = utime.mktime([2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
     elif int(start[:2]) >= int(end[:2]):
         start_time_utime = utime.mktime([2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1])
         end_time_utime = utime.mktime([2000, 1, 3, int(end[:2]), int(end[3:]), 0, 2, 2])
@@ -134,7 +138,7 @@ def light_by_utime_ticks(ticks, power, led_num):
 
 
 @MicroWebSrv.route("/test2")
-def main_get_handler(httpResponse):
+def main_get_handler(httpClient, httpResponse):
     content = home_page % ds.date_time()
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
@@ -157,7 +161,7 @@ def main_post_handler(httpClient, httpResponse):
 
 
 @MicroWebSrv.route("/set-time")
-def main_get_handler(httpResponse):
+def main_get_handler(httpClient, httpResponse):
     content = set_time_page
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
