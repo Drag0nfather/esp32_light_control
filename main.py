@@ -77,19 +77,24 @@ def set_utime_time(start, end):
         curr_time = hour + ':0' + minute
 
     if int(start[:2]) < int(end[:2]):
-        start_time_utime = utime.mktime([2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1])
-        end_time_utime = utime.mktime([2000, 1, 2, int(end[:2]), int(end[3:]), 0, 1, 1])
-        if int(curr_time[:2]) >= int(start[:2]):
-            curr_time_utime = utime.mktime([2000, 1, 1, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
-        elif int(curr_time[:2]) < int(start[:2]):
-            curr_time_utime = utime.mktime([2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
+        start_time_utime = utime.mktime((2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1))
+        end_time_utime = utime.mktime((2000, 1, 2, int(end[:2]), int(end[3:]), 0, 1, 1))
+        curr_time_utime = utime.mktime((2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1))
+        if -86340 <= curr_time_utime - end_time_utime <= -84600:
+            curr_time_utime = utime.mktime((2000, 1, 3, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1))
     elif int(start[:2]) >= int(end[:2]):
-        start_time_utime = utime.mktime([2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1])
-        end_time_utime = utime.mktime([2000, 1, 3, int(end[:2]), int(end[3:]), 0, 2, 2])
-        if int(curr_time[:2]) >= int(start[:2]):
-            curr_time_utime = utime.mktime([2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
-        elif int(curr_time[:2]) < int(start[:2]):
-            curr_time_utime = utime.mktime([2000, 1, 3, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1])
+        start_time_utime = utime.mktime((2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1))
+        end_time_utime = utime.mktime((2000, 1, 3, int(end[:2]), int(end[3:]), 0, 2, 2))
+        if int(start[:2]) <= int(curr_time[:2]) >= int(end[:2]):
+            curr_time_utime = utime.mktime((2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1))
+        elif int(start[:2]) >= int(curr_time[:2]) <= int(end[:2]):
+            curr_time_utime = utime.mktime((2000, 1, 3, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1))
+            if 1840 <= curr_time_utime - end_time_utime <= 3540:
+                curr_time_utime = utime.mktime((2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1))
+        elif int(start[:2]) >= int(curr_time[:2]) >= int(end[:2]):
+            curr_time_utime = utime.mktime((2000, 1, 2, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1))
+            if -86340 <= curr_time_utime - end_time_utime <= -84600:
+                curr_time_utime = utime.mktime((2000, 1, 3, int(curr_time[:2]), int(curr_time[3:]), 0, 1, 1))
 
 
 def light_control_by_time(curr_time, start_time, end_time, is_sunrise):
@@ -168,8 +173,8 @@ def main_get_handler(httpClient, httpResponse):
 def main_get_handler(httpClient, httpResponse):
     form_data = httpClient.ReadRequestPostedFormData()
     hour, minute = form_data['input6'].split(':')
-    ds.hour(hour)
-    ds.minute(minute)
+    ds.hour(int(hour))
+    ds.minute(int(minute))
     content = success_set_time
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
