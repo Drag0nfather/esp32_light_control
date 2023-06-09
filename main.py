@@ -34,9 +34,7 @@ button = machine.Pin(13, machine.Pin.IN)
 
 def start_led(pin_num, duty_num):
     pin = machine.Pin(pin_num)
-    pwm = machine.PWM(pin)
-    pwm.freq(180)
-    pwm.duty(duty_num)
+    pwm = machine.PWM(pin, freq=180, duty=duty_num)
 
 
 def stop_led(pin_num):
@@ -58,7 +56,7 @@ def deactivate_wi_fi():
 
 def start_server(threaded):
     try:
-        mws = MicroWebSrv(port=80, bindIP="192.168.4.1", webPath="/flash/www")
+        mws = MicroWebSrv(port=80, bindIP="192.168.4.1", webPath="/www")
         mws.MaxWebSocketRecvLen = 256
         mws.WebSocketThreaded = False
         mws.Start(threaded=threaded)
@@ -69,7 +67,7 @@ def start_server(threaded):
 def set_end_time(start_time, time_range):
     global end_time
     start_time_utime = utime.mktime((2000, 1, 2, int(start_time[:2]), int(start_time[3:]), 0, 1, 1))
-    end_time_utime = utime.gmtime(start_time_utime + time_range * 60 * 60)
+    end_time_utime = utime.gmtime(start_time_utime + int(time_range) * 60 * 60)
     end_time = f'{end_time_utime[3]}:{end_time_utime[4]}'
     return end_time
 
@@ -152,7 +150,7 @@ def light_by_utime_ticks(ticks, power, led_num):
 
 
 @MicroWebSrv.route('/start')
-def main_page(httpClient, httpResponse):
+def main_page_asdf(httpClient, httpResponse):
     content = main_page
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
@@ -172,10 +170,11 @@ def schedule_page(httpClient, httpResponse):
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
 
-@MicroWebSrv.route('/shedule', 'POST')
+@MicroWebSrv.route('/schedule', 'POST')
 def schedule_page(httpClient, httpResponse):
     global start_time, end_time, time_range, first_pwm, second_pwm, third_pwm, fourth_pwm
     form_data = httpClient.ReadRequestPostedFormData()
+    print(form_data)
     first_pwm = form_data["input1"]
     second_pwm = form_data["input2"]
     third_pwm = form_data["input3"]
@@ -184,7 +183,8 @@ def schedule_page(httpClient, httpResponse):
     mode = form_data['input7']
     time_range = mode
     end_time = False
-    content = success_set_time
+    print(form_data)
+    content = success_setting_schedule % (start_time, start_time)
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
 
@@ -239,7 +239,7 @@ def main_get_handler(httpClient, httpResponse):
 def loop():
     while True:
         global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, wi_fi, is_sunrise, time_range
-        time.sleep(0.5)
+        time.sleep(1)
         button_state = button.value()
         if button_state == 1 and wi_fi is False:
             activate_wi_fi()
@@ -257,9 +257,9 @@ def loop():
             ticks = False
         if ticks is not False:
             light_by_utime_ticks(ticks, abs(int(first_pwm)), 16)
-            light_by_utime_ticks(ticks, abs(int(second_pwm)), 17)
-            light_by_utime_ticks(ticks, abs(int(third_pwm)), 18)
-            light_by_utime_ticks(ticks, abs(int(fourth_pwm)), 19)
+            # light_by_utime_ticks(ticks, abs(int(second_pwm)), 17)
+            # light_by_utime_ticks(ticks, abs(int(third_pwm)), 18)
+            # light_by_utime_ticks(ticks, abs(int(fourth_pwm)), 19)
         if ticks is False:
             stop_led(16)
             stop_led(17)
