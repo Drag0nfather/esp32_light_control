@@ -260,23 +260,25 @@ new_page = """
       vertical-align: middle;
     }
 
-    .button-container {
-      position: fixed;
-      bottom: 35%%;
-      left: 50%%;
-      transform: translateX(-50%%);
-    }
+	.button-container {
+	  text-align: center;
+	  margin-top: 20px;
+	}
 
-    .button-container button {
-      display: inline-block;
-      padding: 10px 30px;
-      background-color: #478ac9;
-      color: #ffffff;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      text-decoration: none;
-    }
+	.button-container button {
+	  display: inline-block;
+	  padding: 10px 30px;
+	  background-color: #478ac9;
+	  color: #ffffff;
+	  border: none;
+	  cursor: pointer;
+	  font-size: 16px;
+	  text-decoration: none;
+	  margin: 10px 0;
+	  width: 100%%;
+	  box-sizing: border-box;
+	}
+
   </style>
 </head>
 <body>
@@ -334,7 +336,7 @@ new_page = """
           <label for="input10">Режим свечения</label>
           <div class="radio-group">
             <input type="radio" id="input11" name="input10" value="18">
-            <label for="input11">Вегетатика</label>
+            <label for="input11">Вегетатика</label><br>
             <input type="radio" id="input12" name="input10" value="12">
             <label for="input12">Цветение</label>
           </div>
