@@ -17,7 +17,7 @@ home_page = """\
   <div style="margin-right: 50px">
 	  <div style="text-align: right; margin-bottom: -3%%"><h4>Текущее время - %s</h4></div>
 	<div>
-	  <form action="/test2" method="post" accept-charset="ISO-8859-1" style="padding: 10px;">
+	  <form action="/manual" method="post" accept-charset="ISO-8859-1" style="padding: 10px;">
 		<div>
 		  <label>1</label>
 		  <input type="range" name="input1" min="-900" max="0" step="1" class="u-input" required="">
@@ -162,7 +162,7 @@ sheduled_time_page = """\
   <div style="margin-right: 50px">
 	  <div style="text-align: right; margin-bottom: -3%%"><h4>Текущее время - %s</h4></div>
 	<div>
-	  <form action="/schedule" method="post" accept-charset="ISO-8859-1" style="padding: 10px;">
+	  <form action="/automatic" method="post" accept-charset="ISO-8859-1" style="padding: 10px;">
 		<div>
 		  <label>1</label>
 		  <input type="range" name="input1" min="-900" max="0" step="1" class="u-input" required="">
@@ -201,4 +201,200 @@ sheduled_time_page = """\
 
 </body></html>
 
+"""
+
+
+new_page = """
+<!DOCTYPE html>
+<html style="font-size: 16px;" lang="ru">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <title>Главная</title>
+  <style>
+    body {
+      background-color: #f5f5f5;
+      color: #333333;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    h4 {
+      color: #333333;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .form-group input[type="range"] {
+      width: 100%%;
+    }
+
+    .form-group input[type="time"] {
+      width: 100%%;
+      padding: 10px 12px;
+    }
+
+    .radio-group {
+      margin-top: 10px;
+    }
+
+    .radio-group label {
+      margin-right: 10px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .button-container {
+      position: fixed;
+      bottom: 35%%;
+      left: 50%%;
+      transform: translateX(-50%%);
+    }
+
+    .button-container button {
+      display: inline-block;
+      padding: 10px 30px;
+      background-color: #478ac9;
+      color: #ffffff;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <section>
+    <div class="container">
+      <div style="text-align: right;">
+        <h4>Текущее время - %s</h4>
+      </div>
+      <form action="/new" method="post" accept-charset="ISO-8859-1">
+        <div class="form-group">
+          <label for="input7">Рассвет/закат</label>
+          <div class="radio-group">
+            <input type="radio" id="input7" name="input7" value="on" required>
+            <label for="input7">вкл</label>
+            <input type="radio" id="input8" name="input7" value="off">
+            <label for="input8">выкл</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input8">Режим свечения</label>
+          <div class="radio-group">
+            <input type="radio" id="input9" name="input8" value="time" checked>
+            <label for="input9">Ручной</label>
+            <input type="radio" id="input10" name="input8" value="mode">
+            <label for="input10">Автоматический</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input1">1</label>
+          <input type="range" id="input1" name="input1" min="-900" max="0" step="1" required>
+        </div>
+        <div class="form-group">
+          <label for="input2">2</label>
+          <input type="range" id="input2" name="input2" min="-900" max="0" step="1" required>
+        </div>
+        <div class="form-group">
+          <label for="input3">3</label>
+          <input type="range" id="input3" name="input3" min="-900" max="0" step="1" required>
+        </div>
+        <div class="form-group">
+          <label for="input4">4</label>
+          <input type="range" id="input4" name="input4" min="-900" max="0" step="1" required>
+        </div>
+        <div class="form-group">
+          <div style="float: left; width: 45%%; height: 100px;">
+            <label for="input5">Время с</label>
+            <input type="time" id="input5" name="input5">
+          </div>
+          <div id="time-field" style="float: right; width: 45%%; height: 100px; display: block;">
+            <label for="input6">Время до</label>
+            <input type="time" id="input6" name="input6">
+          </div>
+        </div>
+        <div id="mode-field" class="form-group" style="text-align: end; display: none;">
+          <label for="input10">Режим свечения</label>
+          <div class="radio-group">
+            <input type="radio" id="input11" name="input10" value="18">
+            <label for="input11">Вегетатика</label>
+            <input type="radio" id="input12" name="input10" value="12">
+            <label for="input12">Цветение</label>
+          </div>
+        </div>
+        <div class="button-container">
+          <button type="submit" id="save-button">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </section>
+  <script>
+    var timeRadio = document.querySelector('input[name="input8"][value="time"]');
+    var modeRadio = document.querySelector('input[name="input8"][value="mode"]');
+    var timeField = document.getElementById('time-field');
+    var modeField = document.getElementById('mode-field');
+    var vegetationRadio = document.getElementById('input11');
+    var floweringRadio = document.getElementById('input12');
+    var saveButton = document.getElementById('save-button');
+
+    function updateRequired() {
+      if (timeRadio.checked) {
+        document.getElementById('input6').required = true;
+        document.getElementById('input11').required = false;
+        document.getElementById('input12').required = false;
+      } else if (modeRadio.checked) {
+        document.getElementById('input6').required = false;
+        document.getElementById('input11').required = true;
+        document.getElementById('input12').required = true;
+      }
+    }
+
+    timeRadio.addEventListener('change', function() {
+      timeField.style.display = 'block';
+      modeField.style.display = 'none';
+      updateRequired();
+    });
+
+    modeRadio.addEventListener('change', function() {
+      timeField.style.display = 'none';
+      modeField.style.display = 'block';
+      updateRequired();
+    });
+
+    vegetationRadio.addEventListener('change', function() {
+      saveButton.disabled = false;
+    });
+
+    floweringRadio.addEventListener('change', function() {
+      saveButton.disabled = false;
+    });
+
+    updateRequired();
+  </script>
+</body>
+</html>
+"""
+
+error_page = """
+<!DOCTYPE html>
+<p1>
+%s
+</p1>
 """
