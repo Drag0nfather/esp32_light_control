@@ -3,7 +3,7 @@ import utime
 import machine
 import network
 import ds1302
-from html_page import home_page, success_setting_schedule, set_time_page, success_set_time, main_page, sheduled_time_page
+from html_page import home_page, success_setting_schedule, set_time_page, success_set_time
 from MicroWebSrv import MicroWebSrv
 import _thread
 
@@ -69,6 +69,13 @@ def set_end_time(start_time, time_range):
     start_time_utime = utime.mktime((2000, 1, 2, int(start_time[:2]), int(start_time[3:]), 0, 1, 1))
     end_time_utime = utime.gmtime(start_time_utime + int(time_range) * 60 * 60)
     end_time = f'{end_time_utime[3]}:{end_time_utime[4]}'
+    if len(end_time) == 4:
+        if end_time[1] == ':':
+            end_time = '0' + end_time
+        elif end_time[2] == ':':
+            end_time = end_time.split(':')[0] + ':0' + end_time.split(':')[1]
+    elif len(end_time) == 3:
+        end_time = '0' + end_time.split(':')[0] + ':0' + end_time.split(':')[1]
     return end_time
 
 
@@ -82,6 +89,7 @@ def set_utime_time(start, end):
         curr_time = hour + ':' + minute
     if len(minute) == 1:
         curr_time = hour + ':0' + minute
+    print(start, end)
     if int(start[:2]) < int(end[:2]):
         start_time_utime = utime.mktime((2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1))
         end_time_utime = utime.mktime((2000, 1, 2, int(end[:2]), int(end[3:]), 0, 1, 1))
@@ -149,47 +157,8 @@ def light_by_utime_ticks(ticks, power, led_num):
         stop_led(led_num)
 
 
-@MicroWebSrv.route('/start')
-def main_page_asdf(httpClient, httpResponse):
-    content = main_page
-    httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
-
-
-@MicroWebSrv.route('/schedule')
+@MicroWebSrv.route('/')
 def schedule_page(httpClient, httpResponse):
-    if len(str(ds.hour())) == 1:
-        hour = '0' + str(ds.hour())
-    else:
-        hour = str(ds.hour())
-    if len(str(ds.minute())) == 1:
-        minute = '0' + str(ds.minute())
-    else:
-        minute = str(ds.minute())
-    hour_minute = f'{hour}:{minute}'
-    content = sheduled_time_page % hour_minute
-    httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
-
-
-@MicroWebSrv.route('/schedule', 'POST')
-def schedule_page(httpClient, httpResponse):
-    global start_time, end_time, time_range, first_pwm, second_pwm, third_pwm, fourth_pwm
-    form_data = httpClient.ReadRequestPostedFormData()
-    print(form_data)
-    first_pwm = form_data["input1"]
-    second_pwm = form_data["input2"]
-    third_pwm = form_data["input3"]
-    fourth_pwm = form_data["input4"]
-    start_time = form_data["input5"]
-    mode = form_data['input7']
-    time_range = mode
-    end_time = False
-    print(form_data)
-    content = success_setting_schedule % (start_time, start_time)
-    httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
-
-
-@MicroWebSrv.route("/test2")
-def main_get_handler(httpClient, httpResponse):
     if len(str(ds.hour())) == 1:
         hour = '0' + str(ds.hour())
     else:
@@ -203,19 +172,26 @@ def main_get_handler(httpClient, httpResponse):
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
 
-@MicroWebSrv.route('/test2', 'POST')
-def main_post_handler(httpClient, httpResponse):
-    global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, is_sunrise, time_range
-
+@MicroWebSrv.route('/', 'POST')
+def schedule_page(httpClient, httpResponse):
+    global start_time, end_time, time_range, first_pwm, second_pwm, third_pwm, fourth_pwm, is_sunrise, time_range
     form_data = httpClient.ReadRequestPostedFormData()
+    print(form_data)
     first_pwm = form_data["input1"]
     second_pwm = form_data["input2"]
     third_pwm = form_data["input3"]
     fourth_pwm = form_data["input4"]
     start_time = form_data["input5"]
-    end_time = form_data["input6"]
     is_sunrise = form_data['input7']
-    time_range = ''
+    try:
+        end_time = form_data["input6"]
+    except KeyError:
+        pass
+    try:
+        time_range = form_data['input10']
+        end_time = set_end_time(start_time, time_range)
+    except KeyError:
+        pass
     content = success_setting_schedule % (start_time, end_time)
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
@@ -238,7 +214,7 @@ def main_get_handler(httpClient, httpResponse):
 
 def loop():
     while True:
-        global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, wi_fi, is_sunrise, time_range
+        global first_pwm, second_pwm, third_pwm, fourth_pwm, start_time, end_time, wi_fi, is_sunrise
         time.sleep(1)
         button_state = button.value()
         if button_state == 1 and wi_fi is False:
@@ -247,8 +223,6 @@ def loop():
         if button_state == 0 and wi_fi is True:
             deactivate_wi_fi()
             wi_fi = False
-        if time_range:
-            end_time = set_end_time(start_time, time_range)
         if start_time and end_time:
             set_utime_time(start_time, end_time)
             global start_time_utime, end_time_utime, curr_time_utime
@@ -265,7 +239,6 @@ def loop():
             stop_led(17)
             stop_led(18)
             stop_led(19)
-
 
 _thread.start_new_thread(start_server, (False,))
 _thread.start_new_thread(loop, ())
