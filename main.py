@@ -1,9 +1,13 @@
 import time
+import os
+
+import json
 import utime
 import machine
 import network
 import ds1302
-from html_page import home_page, success_setting_schedule, set_time_page, success_set_time
+from html_page import home_page, success_setting_schedule, set_time_page, success_set_time, settings_page, \
+    success_reset_settings
 from MicroWebSrv import MicroWebSrv
 import _thread
 
@@ -89,7 +93,6 @@ def set_utime_time(start, end):
         curr_time = hour + ':' + minute
     if len(minute) == 1:
         curr_time = hour + ':0' + minute
-    print(start, end)
     if int(start[:2]) < int(end[:2]):
         start_time_utime = utime.mktime((2000, 1, 2, int(start[:2]), int(start[3:]), 0, 1, 1))
         end_time_utime = utime.mktime((2000, 1, 2, int(end[:2]), int(end[3:]), 0, 1, 1))
@@ -156,9 +159,7 @@ def light_by_utime_ticks(ticks, power, led_num):
     else:
         stop_led(led_num)
 
-
-@MicroWebSrv.route('/')
-def schedule_page(httpClient, httpResponse):
+def set_time_to_html_page():
     if len(str(ds.hour())) == 1:
         hour = '0' + str(ds.hour())
     else:
@@ -167,7 +168,12 @@ def schedule_page(httpClient, httpResponse):
         minute = '0' + str(ds.minute())
     else:
         minute = str(ds.minute())
-    hour_minute = f'{hour}:{minute}'
+    return f'{hour}:{minute}'
+
+
+@MicroWebSrv.route('/')
+def schedule_page(httpClient, httpResponse):
+    hour_minute = set_time_to_html_page()
     content = home_page % hour_minute
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
@@ -176,7 +182,6 @@ def schedule_page(httpClient, httpResponse):
 def schedule_page(httpClient, httpResponse):
     global start_time, end_time, time_range, first_pwm, second_pwm, third_pwm, fourth_pwm, is_sunrise, time_range
     form_data = httpClient.ReadRequestPostedFormData()
-    print(form_data)
     first_pwm = form_data["input1"]
     second_pwm = form_data["input2"]
     third_pwm = form_data["input3"]
@@ -192,6 +197,16 @@ def schedule_page(httpClient, httpResponse):
         end_time = set_end_time(start_time, time_range)
     except KeyError:
         pass
+    time_json = json.dumps(
+        {
+            'start_time': start_time,
+            'end_time': end_time,
+            'first_pwm': first_pwm,
+            'is_sunrise': is_sunrise,
+        }
+    )
+    with open('time_json.json', 'w+') as file:
+        file.write(time_json)
     content = success_setting_schedule % (start_time, end_time)
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
@@ -211,6 +226,26 @@ def main_get_handler(httpClient, httpResponse):
     content = success_set_time
     httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
 
+@MicroWebSrv.route("/settings")
+def main_get_handler(httpClient, httpResponse):
+    hour_minute = set_time_to_html_page()
+    content = settings_page % hour_minute
+    httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
+
+@MicroWebSrv.route("/settings", 'POST')
+def main_get_handler(httpClient, httpResponse):
+    global start_time, end_time, time_range, first_pwm, second_pwm, third_pwm, fourth_pwm, is_sunrise
+    start_time = ''
+    end_time = ''
+    first_pwm = ''
+    is_sunrise = ''
+    try:
+        os.remove('time_json.json')
+    except FileNotFoundError:
+        pass
+    content = success_reset_settings
+    httpResponse.WriteResponseOk(headers=None, contentType="text/html", contentCharset="UTF-8", content=content)
+
 
 def loop():
     while True:
@@ -228,7 +263,21 @@ def loop():
             global start_time_utime, end_time_utime, curr_time_utime
             ticks = light_control_by_time(curr_time_utime, start_time_utime, end_time_utime, is_sunrise)
         else:
-            ticks = False
+            try:
+                with open('time_json.json', 'r') as openfile:
+                    try:
+                        time_json = json.load(openfile)
+                    except ValueError:
+                        ticks = False
+                    if time_json:
+                        start_time = time_json['start_time']
+                        end_time = time_json['end_time']
+                        first_pwm = time_json['first_pwm']
+                        is_sunrise = time_json['is_sunrise']
+                        continue
+            except OSError:
+                ticks = False
+
         if ticks is not False:
             light_by_utime_ticks(ticks, abs(int(first_pwm)), 16)
             # light_by_utime_ticks(ticks, abs(int(second_pwm)), 17)
